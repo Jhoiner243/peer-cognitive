@@ -1,11 +1,6 @@
 import { NodeEntityIndividual } from "./node-individual.entity"
 
-export interface OriginRange {
-  start: number
-  end: number
-  answerObjectId: string
-  nodeIds: string[]
-}
+
 /* 
 Es el objeto unico en el grafo
  */
