@@ -36,7 +36,6 @@ export class ResponseProcessingService {
   parseEdges (
     annotatedEdgeString: string,
     answerObjectId: string,
-    nodes: NodeEntityIndividual[],
   ): EdgeEntity[] {
     const matches = [...annotatedEdgeString.matchAll(EdgeRegexConstant.edgeAnnotationRegex)]
 
