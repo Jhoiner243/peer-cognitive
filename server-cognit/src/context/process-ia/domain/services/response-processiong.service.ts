@@ -3,6 +3,7 @@ import { NodeRegexConstant } from "../constants/node-regex.constanst";
 import { EdgePair } from "../entities/edges/edge-information.entity";
 import { EdgeEntity } from "../entities/edges/edge.entity";
 import { NodeEntityIndividual } from "../entities/nodes/node-individual.entity";
+import { NodeEntity } from "../entities/nodes/node.entity";
 import { ParseSaliencyValueObject } from "../value-objects/parse-saliency.value-object";
 import { TypeAnnotationsService } from "./type-annotations.service";
 
@@ -12,7 +13,7 @@ export class ResponseProcessingService {
   ) {}
 
   /* 
-  el proceso de rehidratación de metadatos. Convierte una cadena de texto plana que contiene "marcas" (anotaciones) en objetos de programación ricos que el frontend puede usar para dibujar y crear interactividad.
+  el proceso de rehidratación de metadatos. Convierte una cadena de texto plana que contiene "marcas" anotaciones en objetos de programación ricos que el frontend puede usar para dibujar y crear interactividad.
   */
   parseNodes (
     annotatedNodeString: string,
@@ -70,5 +71,16 @@ export class ResponseProcessingService {
         originText: match[0]
       }
     })
+  }
+/* 
+  Esta función toma esos IDs y recupera toda la información del nodo su etiqueta, sus menciones en el texto. Sin esto, las flechas no tendrían "anclas" reales a las que conectarse.
+*/
+  getNodeEntityFromNodeEntityId (
+    nodeEntity: NodeEntity[],
+    id: string
+  ): NodeEntity | null {
+    const node = nodeEntity.find(node => node.id === id)
+    if(node) return node
+    return null
   }
 }
