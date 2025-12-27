@@ -1,5 +1,6 @@
-import type { Edge, Node } from "@xyflow/react";
-import { getNewCustomNode } from "../componentsFlow/Node";
+import { Edge, Node } from "reactflow";
+import { getNewEdge } from "../componentsFlow/Edge";
+import { CustomNodeData, getNewCustomNode } from "../componentsFlow/Node";
 import { nodeLabelling } from "../constants/labellings";
 import { QuestionAndAnswerSynced } from "../types/answer";
 import { EdgePair } from "../types/entities/edges/edge-information.entity";
@@ -321,6 +322,38 @@ export const answerObjectsToReactFlow = (
       ),
     )
   })
+
+   filteredEdgeEntities.forEach(
+    ({ edgeLabel, edgePairs, originRange, originText }) => {
+      edgePairs.forEach(({ sourceId, targetId }) => {
+        const targetNode: Node<CustomNodeData> | undefined  = nodes.find(
+          node => node.id === targetId,
+        )
+        if (!targetNode) return null
+
+        edges.push(
+          getNewEdge(
+            {
+              source: sourceId,
+              target: targetId,
+              sourceHandle: newNodesTracker[sourceId].sourceHandleId,
+              targetHandle: newNodesTracker[targetId].targetHandleId,
+            },
+            {
+              label: edgeLabel,
+              customType: targetNode.data.generated.pseudo  ? 'plain' : 'arrow',
+              editing: false,
+              generated: {
+                pseudo: false,
+                originRanges: [originRange],
+                originTexts: [originText],
+              },
+            },
+          ),
+        )
+      })
+    },
+  )
   return {
     nodes,
     edges

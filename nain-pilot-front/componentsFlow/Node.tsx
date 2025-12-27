@@ -1,4 +1,4 @@
-import { Node, NodeProps } from "@xyflow/react"
+import { Node, NodeProps } from "reactflow"
 import { OriginRange } from "../types/entities/nodes/node-individual.entity"
 import { hardcodedNodeSize } from "../utils/constants"
 
