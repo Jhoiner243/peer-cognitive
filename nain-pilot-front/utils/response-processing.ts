@@ -1,4 +1,5 @@
 import { AnswerObject, RelationshipSaliency } from "../types/answer";
+import { EdgePair } from "../types/entities/edges/edge-information.entity";
 import { EdgeEntity } from "../types/entities/edges/edge.entity";
 import { OriginRange } from "../types/entities/nodes/node-individual.entity";
 import { NodeEntity } from "../types/entities/nodes/node.entity";
@@ -82,5 +83,63 @@ export const getRangeFromStart = (
     if (edgeEntity.originRange.start === start) {
       return edgeEntity.originRange
     }
+  }
+}
+
+/* 
+Su objetivo es limpiar las etiquetas de los nodos para que el grafo sea visualmente más claro y profesional, eliminando artículos y determinantes que no aportan significado real al concepto.
+*/
+export const cleanNodeLabel = (label: string) => {
+  // remove These, This, Those, That, A, An, The, Their, Its, etc.
+  const cleanedLabel = label.replace(
+    /^(these|this|those|that|a|an|the|their|its|his|her|their|our|my|your)\s/i,
+    '',
+  )
+
+  return cleanedLabel
+}
+
+/* 
+Esta función es un Detector de Continuidad en la Red. Su propósito es verificar si un nodo que actualmente es el "final" de una relación (un targetId) también actúa como el "origen" (sourceId) de otra relación en cualquier parte del grafo.
+*/
+export const pairTargetIdHasPair = (
+  edgeEntities: EdgeEntity[],
+  targetId: string,
+) => {
+  return edgeEntities.some(edgeEntity =>
+    edgeEntity.edgePairs.some(edgePair => edgePair.sourceId === targetId),
+  )
+}
+
+
+export const getNodeEntityFromNodeEntityId = (
+  nodeEntities: NodeEntity[],
+  id: string,
+): NodeEntity | null => {
+  const nodeEntity = nodeEntities.find(node => node.id === id)
+  if (nodeEntity) return nodeEntity
+  return null
+}
+
+export const havePair = (pairs: EdgePair[], pair: EdgePair) => {
+  return pairs.some(
+    p => p.sourceId === pair.sourceId && p.targetId === pair.targetId,
+  )
+}
+
+
+export const getEntitySource = (entity: NodeEntity) => {
+  const originRanges: OriginRange[] = []
+  const originTexts: string[] = []
+  entity.individuals.map(individual => {
+    originRanges.push(individual.originRange)
+    originTexts.push(individual.originText)
+
+    return null
+  })
+
+  return {
+    originRanges,
+    originTexts,
   }
 }
