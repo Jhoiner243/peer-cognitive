@@ -26,6 +26,7 @@ export interface CustomEdgeData {
   customType: 'dash' | 'plain' | 'arrow'
   editing: boolean
   generated: GeneratedInformation
+  saliency?: 'high' | 'low'
 }
 
 interface CustomEdgeProps extends EdgeProps {
@@ -52,7 +53,7 @@ export const CustomEdge = memo(
 
     if (!sourceNode || !targetNode) return null
 
-    const { customType } = data as CustomEdgeData
+    const { customType, saliency } = data as CustomEdgeData
 
     const { sx, sy, tx, ty } = getEdgeParams(sourceNode, targetNode)
     const [edgePath, labelX, labelY] = getStraightPath({
@@ -72,6 +73,8 @@ export const CustomEdge = memo(
         customMarkerEnd = `url(#${getMarkerId(styles.edgeColorStrokeSelected)})`
       else customMarkerEnd = markerEnd as string
     }
+
+    const strokeOpacity = saliency === 'low' ? 0.5 : 1
 
     return (
       <>
@@ -97,6 +100,7 @@ export const CustomEdge = memo(
             customType === 'dash' ? styles.edgeDashLineArray : undefined
           }
           markerEnd={customMarkerEnd}
+          style={{ strokeOpacity }}
         />
         <EdgeCustomLabel
           edgeId={id}

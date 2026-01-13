@@ -15,7 +15,7 @@ interface ModelStatus {
   modelInitialPrompts: Prompt[]
 }
 
-export type ModelForMagic = 'gpt-5' | 'gpt-3.5-turbo'
+export type ModelForMagic = 'gpt-4' | 'gpt-3.5-turbo'
 
 export interface QuestionAndAnswer {
   id: string
@@ -57,3 +57,32 @@ export interface FlowContextType {
   setModel: (model: ModelForMagic) => void
 }
 export const FlowContext = createContext<FlowContextType>({} as FlowContextType)
+
+export type OriginRange = {
+  start: number
+  end: number
+  answerObjectId: string
+  nodeIds: string[]
+}
+
+export interface InterchangeContextType {
+  questionAndAnswer: {
+    answerObjects: any[]
+  }
+  handleSetSyncedCoReferenceOriginRanges: (ranges: OriginRange[]) => void
+  handleAnswerObjectNodeMerge: (answerObjectId: string, sourceId: string, targetId: string) => void
+}
+export const InterchangeContext = createContext<InterchangeContextType>({
+  questionAndAnswer: { answerObjects: [] },
+  handleSetSyncedCoReferenceOriginRanges: () => {},
+  handleAnswerObjectNodeMerge: () => {}
+})
+
+export interface ReactFlowObjectContextType {
+  answerObjectId: string
+  generatingFlow: boolean
+}
+export const ReactFlowObjectContext = createContext<ReactFlowObjectContextType>({
+  answerObjectId: 'default',
+  generatingFlow: false
+})

@@ -1,16 +1,13 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './context/users/auth.module';
+import { ConfigModule } from '@nestjs/config';
+import { ProcessIAModule } from './context/process-ia/infraestructure/ai/stream.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'database.sqlite',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
-    AuthModule,
+    ProcessIAModule,
   ],
   controllers: [],
   providers: [],
