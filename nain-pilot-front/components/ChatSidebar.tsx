@@ -1,61 +1,21 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Message, MessageAvatar, MessageContent, MessageResponse } from "@/components/ai-elements/message-simple"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarRail
 } from "@/components/ui/sidebar"
+import { useMessages } from "@/contexts/MessagesContext"
 import { useAIStream } from "@/hooks/use-ai-stream"
-import { Bot, Send, User } from "lucide-react"
+import { Bot } from "lucide-react"
 import * as React from "react"
 
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
 export function ChatSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { generate, streaming, currentResponse } = useAIStream()
-  const [messages, setMessages] = React.useState<Message[]>([])
-  const [inputValue, setInputValue] = React.useState("")
-  const scrollRef = React.useRef<HTMLDivElement>(null)
-
-  // Auto-scroll to bottom
-  React.useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [messages, currentResponse])
-
-  const handleSend = () => {
-    if (!inputValue.trim() || streaming) return
-
-    // Add user message immediately
-    setMessages(prev => [...prev, { role: 'user', content: inputValue }])
-    
-    // Trigger generation
-    generate(inputValue)
-    
-    setInputValue("")
-  }
-
-  // Handle stream completion or updates
-  // Since useAIStream doesn't give us a "history" but just the current chunked response,
-  // we display the currentResponse while streaming.
-  // When streaming ends, we should persist it.
-  // BUT: useAIStream interface in previous step didn't explicitly signal "end" via state cleanly 
-  // other than `streaming` going false.
-  // Let's watch `streaming`. 
+  const { streaming, currentResponse } = useAIStream()
+  const { messages, setMessages } = useMessages()
   
-  // Actually, a better pattern might be:
-  // Render messages normally.
-  // if (streaming && currentResponse), render a partial assistant message.
-  
-  // When streaming goes from true to false, append the final response.
   const wasStreaming = React.useRef(false)
   
   React.useEffect(() => {
@@ -63,75 +23,65 @@ export function ChatSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
        setMessages(prev => [...prev, { role: 'assistant', content: currentResponse }])
     }
     wasStreaming.current = streaming
-  }, [streaming, currentResponse])
+  }, [streaming, currentResponse, setMessages])
 
   return (
-    <Sidebar {...props}>
-      <SidebarContent>
-        <ScrollArea  className=" h-full p-4">
-          <div className="flex flex-col gap-4">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex gap-3 ${
-                  msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-                }`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                    msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                  }`}
-                >
-                  {msg.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+    <Sidebar {...props} className="border-r bg-sidebar">
+      {/* Header */}
+      <div className="p-4 border-b bg-sidebar-header/50">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <Bot className="w-4 h-4 text-primary-foreground" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm text-sidebar-foreground">AI Assistant</h3>
+            <p className="text-xs text-muted-foreground">Always here to help</p>
+          </div>
+        </div>
+      </div>
+
+      <SidebarContent className="p-0">
+        <ScrollArea className="h-full px-4">
+          <div className="py-4 space-y-4">
+            {messages.length === 0 && !streaming && (
+              <div className="text-center py-8">
+                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
+                  <Bot className="w-6 h-6 text-muted-foreground" />
                 </div>
-                <div
-                  className={`rounded-lg p-3 max-w-[85%] text-sm ${
-                    msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted/50'
-                  }`}
-                >
-                  {msg.content}
-                </div>
-              </div>
-            ))}
-            
-            {/* Streaming Message */}
-            {streaming && currentResponse && (
-              <div className="flex gap-3 flex-row">
-                 <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4" />
-                 </div>
-                 <div className="rounded-lg p-3 max-w-[85%] text-sm bg-muted/50 animate-pulse">
-                    {currentResponse}
-                 </div>
+                <h4 className="font-medium text-sm text-sidebar-foreground mb-1">Start a conversation</h4>
+                <p className="text-xs text-muted-foreground">Ask me anything about your data</p>
               </div>
             )}
             
-            <div ref={scrollRef} />
+             {messages.filter(msg => msg.role === 'assistant').map((msg, i) => (
+               <Message key={i} from="assistant">
+                 <div className="flex gap-3 group animate-in slide-in-from-bottom-2 fade-in-0 flex-row">
+                   <MessageAvatar from="assistant" />
+                   <MessageContent className="max-w-[85%] shadow-sm">
+                     <MessageResponse className="text-sm leading-relaxed">{currentResponse}</MessageResponse>
+                   </MessageContent>
+                 </div>
+               </Message>
+             ))}
+            
+             {streaming && currentResponse && (
+               <Message from="assistant" className="h-screen">
+                 <div className="flex gap-3 flex-row animate-in slide-in-from-bottom-2">
+                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 ring-2 ring-muted/20">
+                   </div>
+                   <MessageContent className="max-w-[85%] shadow-sm">
+                     <MessageResponse className="text-sm leading-relaxed">
+                       {currentResponse}
+                       <span className="inline-block w-2 h-4 bg-muted animate-pulse ml-1" />
+                     </MessageResponse>
+                   </MessageContent>
+                 </div>
+               </Message>
+             )}
           </div>
         </ScrollArea>
       </SidebarContent>
-      <SidebarFooter className="border-t p-4">
-        <form
-          onSubmit={(e) => {
-             e.preventDefault()
-             handleSend()
-          }}
-          className="flex gap-2"
-        >
-          <Input
-            placeholder="Ask something..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            disabled={streaming}
-          />
-          <Button type="submit" size="icon" disabled={streaming || !inputValue.trim()}>
-            <Send className="w-4 h-4" />
-            <span className="sr-only">Send</span>
-          </Button>
-        </form>
-      </SidebarFooter>
+      
       <SidebarRail />
     </Sidebar>
   )
