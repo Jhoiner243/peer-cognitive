@@ -207,9 +207,10 @@ export const EdgeCustomLabel = memo(
         <div className="super-wrapper super-wrapper-edge super-wrapper-static-text super-wrapper-static-text-edge">
           <span className="edge-label">{edgeData.label}</span>
 
-          {edgeData.label.length > 0 && (
+          {/* Tooltip disabled to prevent duplicate labels */}
+          {/* {edgeData.label.length > 0 && (
             <div className="content-tooltip">{edgeData.label}</div>
-          )}
+          )} */}
 
           {/* -------------------------------------------------------------------------- */}
         </div>

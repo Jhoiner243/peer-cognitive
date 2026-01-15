@@ -36,7 +36,6 @@ import ReactFlow, {
   useReactFlow
 } from 'reactflow'
 import 'reactflow/dist/style.css'
-import { CustomControls } from '../componentsFlow/CustomControl'
 import { CustomMarkerDefs } from '../componentsFlow/CustomDefs'
 import {
   CustomConnectionLine,
@@ -47,6 +46,7 @@ import {
 } from '../componentsFlow/Edge'
 import { CustomNode, CustomNodeData, customAddNodes, hardcodedNodeWidthEstimation } from '../componentsFlow/Node'
 import { SimpleEdge } from '../componentsFlow/SimpleEdge'
+import '../styles/react-flow-custom.css'
 import {
   hardcodedNodeSize,
   styles,
@@ -56,11 +56,14 @@ import { PromptSourceComponentsType } from '../utils/magicExplain'
 import { ModelForMagic, globalBestModelAvailable } from '../utils/openAI'
 import { EntityType } from '../utils/socket'
 import { useTimeMachine } from '../utils/timeMachine'
-import { FlowContext, InterchangeContext, OriginRange, ReactFlowObjectContext } from './Contexts'
+import { FlowContext, OriginRange, ReactFlowObjectContext } from './Contexts'
 
 
 // Use our socket hook for data
 import { useSocket } from '@/hooks/use-socket'
+import { CustomControls } from '../componentsFlow/CustomControl'
+import { AnswerObject } from '../types/answer'
+import { InterchangeContext } from './Interchange'
 // Use dagre for layout if we want auto-layout, but user code didn't seem to have it in the snippet
 // Check if user want auto-layout. Prior implementation used it.
 // User code handles "InterchangeContext.answerObjects" to drive nodes/edges.
@@ -100,11 +103,10 @@ const Flow = () => {
     // For simplicity, I'm using default values matching the "Mock" logic.
     // Ideally we'd wrap this component in Providers.
     
-  const {
-    questionAndAnswer: { answerObjects },
-    handleSetSyncedCoReferenceOriginRanges,
-    handleAnswerObjectNodeMerge,
-  } = useContext(InterchangeContext)
+  const interchangeContext = useContext(InterchangeContext)
+  const answerObjects = interchangeContext?.questionAndAnswer?.answerObjects ?? []
+  const handleSetSyncedCoReferenceOriginRanges = interchangeContext?.handleSetSyncedCoReferenceOriginRanges ?? (() => {})
+  const handleAnswerObjectNodeMerge = interchangeContext?.handleAnswerObjectNodeMerge ?? (() => {})
   const { answerObjectId, generatingFlow } = useContext(ReactFlowObjectContext)
 
   const thisReactFlowInstance = useReactFlow()
@@ -117,11 +119,16 @@ const Flow = () => {
     getViewport,
   }: ReactFlowInstance = thisReactFlowInstance
 
-  const answerObject = answerObjects.find(a => a.id === answerObjectId)
+  const answerObject = answerObjects.find((a: AnswerObject) => a.id === answerObjectId)
 
   // use default nodes and edges
   const [nodes, , onNodesChange] = useNodesState(defaultNodes)
   const [edges, , onEdgesChange] = useEdgesState(defaultEdges)
+  
+  // Node interaction state
+  const [highlightedNodeIds, setHighlightedNodeIds] = useState<string[]>([])
+  const [collapsedNodeIds, setCollapsedNodeIds] = useState<string[]>([])
+  const [selectedNodeForMerge, setSelectedNodeForMerge] = useState<string | null>(null)
   
   // --- INTEGRATION: SOCKET LISTENER ---
   const { socket } = useSocket()
@@ -178,6 +185,10 @@ const Flow = () => {
        // Direct mapping without complex filtering
        const rfNodes: Node[] = data.nodes.map((n: any) => {
          const label = n.nodeLabel || n.id
+         const isHighlighted = highlightedNodeIds.includes(n.id)
+         const isCollapsed = collapsedNodeIds.includes(n.id)
+         const isSelectedForMerge = selectedNodeForMerge === n.id
+         
          return {
             id: n.id,
             type: 'custom', 
@@ -187,22 +198,28 @@ const Flow = () => {
               sourceHandleId: `handle-${n.id}-source`,
               targetHandleId: `handle-${n.id}-target`,
               editing: false,
-              styleBackground: styles.nodeColorDefaultWhite,
+              styleBackground: isSelectedForMerge 
+                ? 'rgba(59, 130, 246, 0.1)' // Blue for merge source
+                : styles.nodeColorDefaultWhite,
               generated: {
                 pseudo: false,
                 originRanges: n.originRange ? [n.originRange] : [],
                 originTexts: [n.originText || '']
               }
             },
-            position: { x: 0, y: 0 }, 
+            position: { x: 0, y: 0 },
             width: hardcodedNodeWidthEstimation(label, false),
             height: hardcodedNodeSize.height,
+            className: `${isHighlighted ? 'custom-node-body-highlighted' : ''} ${isCollapsed ? 'node-collapsed' : ''}`.trim(),
          }
        })
        
+       let edgeCounter = 0;
        const rfEdges: Edge[] = data.edges.flatMap((e: any) => 
-         e.edgePairs.map((pair: any, idx: number) => ({
-            id: `edge-${pair.sourceId}-${pair.targetId}-${e.edgeLabel}-${idx}`,
+         e.edgePairs.map((pair: any) => {
+            const uniqueId = `edge-${pair.sourceId}-${pair.targetId}-${e.edgeLabel}-${edgeCounter++}`;
+            return {
+            id: uniqueId,
             source: pair.sourceId,
             target: pair.targetId,
             type: 'custom',
@@ -221,7 +238,7 @@ const Flow = () => {
                  type: MarkerType.ArrowClosed,
                  color: styles.edgeColorStrokeDefault,
             }
-         }))
+         }})
        )
        
        console.log('[KnowledgeGraph] Mapped nodes/edges:', { nodes: rfNodes.length, edges: rfEdges.length })
@@ -250,10 +267,8 @@ const Flow = () => {
   // ------------------------------------
 
   const defaultViewport = {
-    x: (window.innerWidth * 0.5) / 2,
-    y: Math.min(window.innerHeight * 0.3, 1000) / 2,
-    // x: 0,
-    // y: 0,
+    x: typeof window !== 'undefined' ? (window.innerWidth * 0.5) / 2 : 0,
+    y: typeof window !== 'undefined' ? Math.min(window.innerHeight * 0.3, 1000) / 2 : 0,
     zoom: 1,
   }
 
@@ -300,6 +315,56 @@ const Flow = () => {
 
   // ! on connect
   const onConnect = useCallback(() => {}, [])
+
+  /* -------------------------------------------------------------------------- */
+  // ! Node Interactions
+  /* -------------------------------------------------------------------------- */
+
+  // Node click handler - Toggle highlight
+  const onNodeClick = useCallback((event: MouseEvent, node: Node) => {
+    console.log('[KnowledgeGraph] Node clicked:', node.id)
+    
+    setHighlightedNodeIds(prev => {
+      if (prev.includes(node.id)) {
+        // Remove from highlighted
+        return prev.filter(id => id !== node.id)
+      } else {
+        // Add to highlighted
+        return [...prev, node.id]
+      }
+    })
+  }, [])
+
+  // Node context menu - For merge and collapse
+  const onNodeContextMenu = useCallback((event: MouseEvent, node: Node) => {
+    event.preventDefault()
+    console.log('[KnowledgeGraph] Node right-clicked:', node.id)
+    
+    // If a node is already selected for merge, merge them
+    if (selectedNodeForMerge && selectedNodeForMerge !== node.id) {
+      console.log('[KnowledgeGraph] Merging nodes:', selectedNodeForMerge, '->', node.id)
+      handleAnswerObjectNodeMerge('default', selectedNodeForMerge, node.id)
+      setSelectedNodeForMerge(null)
+    } else {
+      // Select this node for merge
+      setSelectedNodeForMerge(node.id)
+    }
+  }, [selectedNodeForMerge, handleAnswerObjectNodeMerge])
+
+  // Node double click - Toggle collapse
+  const onNodeDoubleClick = useCallback((event: MouseEvent, node: Node) => {
+    console.log('[KnowledgeGraph] Node double-clicked:', node.id)
+    
+    setCollapsedNodeIds(prev => {
+      if (prev.includes(node.id)) {
+        // Expand
+        return prev.filter(id => id !== node.id)
+      } else {
+        // Collapse
+        return [...prev, node.id]
+      }
+    })
+  }, [])
 
   /* -------------------------------------------------------------------------- */
   // ! node
@@ -781,15 +846,15 @@ const Flow = () => {
           selectNodesOnDrag={false}
           // ! actions
           onScroll={handleScroll}
-          onNodeClick={handleNodeClick}
-          onNodeDoubleClick={handleNodeDoubleClick}
-          onNodeContextMenu={handleNodeContextMenu}
+          onNodeClick={onNodeClick as any}
+          onNodeContextMenu={onNodeContextMenu as any}
+          onNodeDoubleClick={onNodeDoubleClick as any}
+          onPaneClick={handlePaneClick}
           onNodeDragStart={handleNodeDragStart}
           onNodeDrag={handleNodeDrag}
           onNodeDragStop={handleNodeDragStop}
           onEdgeClick={handleEdgeClick}
           onEdgeDoubleClick={handleEdgeDoubleClick}
-          onPaneClick={handlePaneClick}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           // onPaneContextMenu={handlePaneContextMenu}
@@ -798,6 +863,17 @@ const Flow = () => {
           onEdgeMouseEnter={handleEdgeMouseEnter}
           onEdgeMouseLeave={handleEdgeMouseLeave}
         >
+            <CustomControls
+            nodes={nodes}
+            edges={edges}
+            selectedComponents={selectedComponents}
+            undoTime={undoTime}
+            redoTime={redoTime}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            flowWrapperRef={reactFlowWrapper}
+          />
+          
           <CustomMarkerDefs
             markerOptions={
               {
@@ -812,17 +888,9 @@ const Flow = () => {
               } as EdgeMarker
             }
           />
-          <CustomControls
-            nodes={nodes}
-            edges={edges}
-            selectedComponents={selectedComponents}
-            undoTime={undoTime}
-            redoTime={redoTime}
-            canUndo={canUndo}
-            canRedo={canRedo}
-            flowWrapperRef={reactFlowWrapper}
-          />
-          <Background color="#008ddf" />
+        
+          <Background className="bg-background" color="hsl(var(--muted))" />
+
         </ReactFlow>
       </div>
     </FlowContext.Provider>

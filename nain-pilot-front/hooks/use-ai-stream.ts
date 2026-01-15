@@ -12,13 +12,14 @@ export const useAIStream = () => {
         if (!socket) return;
 
         const handleStreamText = (text: string) => {
+            setStreaming(true);
             responseAccumulator.current += text;
             setCurrentResponse(responseAccumulator.current);
         };
 
         const handleStreamFinish = () => {
             setStreaming(false);
-            console.log('Stream finished');
+            console.log('Stream finished. Respuesta original:', responseAccumulator.current);
         };
 
         const handleError = (error: any) => {

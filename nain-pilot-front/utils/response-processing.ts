@@ -143,3 +143,95 @@ export const getEntitySource = (entity: NodeEntity) => {
     originTexts,
   }
 }
+
+export const mergeNodeEntities = (
+  answerObjects: AnswerObject[],
+  answerObjectIdsHidden: string[],
+) => {
+  const nodeEntities: NodeEntity[] = []
+
+  answerObjects.forEach(answerObject => {
+    if (answerObjectIdsHidden.includes(answerObject.id)) return
+
+    answerObject[
+      listDisplayToEntityTarget(answerObject.answerObjectSynced.listDisplay)
+    ].nodeEntities.forEach(nodeEntity => {
+      const existingNode = nodeEntities.find(n => n.id === nodeEntity.id)
+
+      if (existingNode) {
+        existingNode.individuals.push(...nodeEntity.individuals)
+      } else {
+        nodeEntities.push(nodeEntity)
+      }
+    })
+  })
+
+  return nodeEntities
+}
+
+export const mergeEdgeEntities = (
+  answerObjects: AnswerObject[],
+  answerObjectIdsHidden: string[],
+) => {
+  const edgeEntities: EdgeEntity[] = []
+
+  answerObjects.forEach(answerObject => {
+    if (answerObjectIdsHidden.includes(answerObject.id)) return
+
+    answerObject[
+      listDisplayToEntityTarget(answerObject.answerObjectSynced.listDisplay)
+    ].edgeEntities.forEach(edgeEntity => {
+      edgeEntities.push(edgeEntity)
+    })
+  })
+
+  return edgeEntities
+}
+
+export const splitAnnotatedSentences = (text: string): string[] => {
+  const sentences: string[] = []
+  let sentenceStart = 0
+  let inAnnotation = false
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i]
+
+    if (char === '[') {
+      inAnnotation = true
+    } else if (char === ']') {
+      inAnnotation = false
+    }
+
+    if (
+      !inAnnotation &&
+      char === '.' &&
+      (i === text.length - 1 || text[i + 1].match(/\s/))
+    ) {
+      sentences.push(text.slice(sentenceStart, i + 1))
+      sentenceStart = i + 1
+    }
+  }
+
+  if (sentenceStart < text.length) {
+    sentences.push(text.slice(sentenceStart))
+  }
+
+  return sentences
+}
+
+export const findOrphanNodeEntities = (
+  nodeEntities: NodeEntity[],
+  edgeEntities: EdgeEntity[],
+) => {
+  return nodeEntities.filter(nodeEntity => {
+    return (
+      edgeEntities.find(edgeEntity =>
+        edgeEntity.edgePairs.some(
+          edgePair =>
+            edgePair.sourceId === nodeEntity.id ||
+            edgePair.targetId === nodeEntity.id,
+        ),
+      ) === undefined
+    )
+  })
+}

@@ -58,6 +58,10 @@ export interface FlowContextType {
 }
 export const FlowContext = createContext<FlowContextType>({} as FlowContextType)
 
+/* -------------------------------------------------------------------------- */
+/* INTERCHANGE CONTEXT - For graph interactions and answer object management */
+/* -------------------------------------------------------------------------- */
+
 export type OriginRange = {
   start: number
   end: number
@@ -65,18 +69,11 @@ export type OriginRange = {
   nodeIds: string[]
 }
 
-export interface InterchangeContextType {
-  questionAndAnswer: {
-    answerObjects: any[]
-  }
-  handleSetSyncedCoReferenceOriginRanges: (ranges: OriginRange[]) => void
-  handleAnswerObjectNodeMerge: (answerObjectId: string, sourceId: string, targetId: string) => void
-}
-export const InterchangeContext = createContext<InterchangeContextType>({
-  questionAndAnswer: { answerObjects: [] },
-  handleSetSyncedCoReferenceOriginRanges: () => {},
-  handleAnswerObjectNodeMerge: () => {}
-})
+
+
+/* -------------------------------------------------------------------------- */
+/* REACT FLOW OBJECT CONTEXT - For managing specific answer objects in flow */
+/* -------------------------------------------------------------------------- */
 
 export interface ReactFlowObjectContextType {
   answerObjectId: string
