@@ -5,16 +5,15 @@ import {
   PromptInputAttachment,
   PromptInputAttachments,
   PromptInputBody,
-  PromptInputFooter,
   type PromptInputMessage,
   PromptInputProvider,
   PromptInputSubmit,
-  PromptInputTextarea,
-  PromptInputTools
+  PromptInputTextarea
 } from "@/components/ai-elements/prompt-input";
 import { useMessages } from "@/contexts/MessagesContext";
 import { useAIStream } from "@/hooks/use-ai-stream";
 import { useEffect, useState } from "react";
+import { Shimmer } from "./ai-elements/shimmer";
 
 export const models = [
   {
@@ -55,14 +54,11 @@ export const models = [
 ];
 
 export const TextAreaPrompts = () => {
-
   const { addMessage } = useMessages();
   const { generate, streaming } = useAIStream();
   const [status, setStatus] = useState<
     "submitted" | "streaming" | "ready" | "error"
   >("ready");
-
-
 
   // Sync status with streaming
   useEffect(() => {
@@ -88,29 +84,33 @@ export const TextAreaPrompts = () => {
 
     // Trigger generation
     generate(message.text || "");
-
-    // The status transition to "streaming" will be handled by the useEffect above
-    // or we can set it here if desired, but AI stream starts soon.
   };
 
   return (
-    <div className="w-full bg-background/95 backdrop-blur-sm border rounded-xl shadow-lg">
-      <PromptInputProvider>
-        <PromptInput globalDrop multiple onSubmit={handleSubmit}>
-          <PromptInputAttachments>
+    <div className="w-full bg-background/95  ">
+      <div className="ml-1 mb-1">
+        {
+          status === "streaming" ? (
+            <Shimmer className="text-xs " >
+              Thinking...
+            </Shimmer>
+          ) : null
+        }
+      </div>
+      <PromptInputProvider >
+        <PromptInput globalDrop multiple onSubmit={handleSubmit} >
+          <PromptInputAttachments  >
             {(attachment) => <PromptInputAttachment data={attachment} key={attachment.id} />}
           </PromptInputAttachments>
-          <PromptInputBody>
+          <PromptInputBody 
+          >
             <PromptInputTextarea 
               placeholder="Ask anything about the knowledge graph..." 
               className="min-h-[10px] max-h-[100px] border-0 bg-transparent resize-none"
             />
           </PromptInputBody>
-          <PromptInputFooter >
-            <PromptInputTools>
-            </PromptInputTools>
             <PromptInputSubmit status={status} />
-          </PromptInputFooter>
+     
         </PromptInput>
       </PromptInputProvider>
     </div>

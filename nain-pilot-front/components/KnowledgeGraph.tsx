@@ -54,15 +54,16 @@ import {
 } from '../utils/constants'
 import { PromptSourceComponentsType } from '../utils/magicExplain'
 import { ModelForMagic, globalBestModelAvailable } from '../utils/openAI'
-import { EntityType } from '../utils/socket'
 import { useTimeMachine } from '../utils/timeMachine'
 import { FlowContext, OriginRange, ReactFlowObjectContext } from './Contexts'
+
 
 
 // Use our socket hook for data
 import { useSocket } from '@/hooks/use-socket'
 import { CustomControls } from '../componentsFlow/CustomControl'
 import { AnswerObject } from '../types/answer'
+import { EntityType } from '../utils/socket'
 import { InterchangeContext } from './Interchange'
 // Use dagre for layout if we want auto-layout, but user code didn't seem to have it in the snippet
 // Check if user want auto-layout. Prior implementation used it.
@@ -183,7 +184,25 @@ const Flow = () => {
        console.log('[KnowledgeGraph] Advanced Flow Graph Update:', data)
        
        // Direct mapping without complex filtering
-       const rfNodes: Node[] = data.nodes.map((n: any) => {
+       const connectedNodeIds = new Set<string>()
+       data.edges.forEach((e: any) => {
+         e.edgePairs.forEach((pair: any) => {
+           connectedNodeIds.add(pair.sourceId)
+           connectedNodeIds.add(pair.targetId)
+         })
+       })
+
+       const filteredNodes = data.nodes.filter((n: any) => {
+         if (n.id === '$N1') return true
+         return connectedNodeIds.has(n.id)
+       })
+
+       if (filteredNodes.length === 0 && data.nodes.length > 0) {
+          // If everything is filtered but there was data, keep at least one (fallback)
+          // Actually, user wants "strictly eliminate", so I will follow that.
+       }
+
+       const rfNodes: Node[] = filteredNodes.map((n: any) => {
          const label = n.nodeLabel || n.id
          const isHighlighted = highlightedNodeIds.includes(n.id)
          const isCollapsed = collapsedNodeIds.includes(n.id)
@@ -873,6 +892,7 @@ const Flow = () => {
             canRedo={canRedo}
             flowWrapperRef={reactFlowWrapper}
           />
+          
           
           <CustomMarkerDefs
             markerOptions={

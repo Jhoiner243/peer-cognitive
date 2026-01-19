@@ -1,4 +1,5 @@
 import { FitView, Handle, Instance, Node, NodeProps, Position } from "reactflow"
+import { MagicNodeTaggingItem, MagicSuggestItem, MagicToolbox } from "../components/MagicToolbox"
 import { OriginRange } from "../types/entities/nodes/node-individual.entity"
 import { hardcodedNodeSize, viewFittingOptions } from "../utils/constants"
 import randomPhrases from "../utils/randomPhrases"
@@ -99,7 +100,7 @@ export const CustomNode = ({ data, selected }: CustomNodeProps) => {
 
   return (
     <div
-      className={`relative px-4 py-2 shadow-md rounded-md bg-white border-2 transition-all duration-200 ${
+      className={`relative px-4 py-2 shadow-md rounded-md dark:bg-black border-2 transition-all duration-200 ${
         selected ? 'border-primary ring-2 ring-primary/20' : 'border-stone-200 hover:border-stone-400'
       } ${isPseudo ? 'opacity-50 border-dashed' : ''} min-w-[150px]`}
       style={{ background: data.styleBackground }}
@@ -133,6 +134,18 @@ export const CustomNode = ({ data, selected }: CustomNodeProps) => {
         className="w-3 h-3 !bg-stone-400 rounded-full"
         id={data.sourceHandleId}
       />
+
+      {selected && (
+        <MagicToolbox key={`toolbox-${data.id}`}>
+          <MagicSuggestItem
+            target="node"
+            targetId={data.id as any}
+            nodeLabelAndTags={[]}
+            edgeLabels={[]}
+          />
+          <MagicNodeTaggingItem targetId={data.id as any} label={data.label} />
+        </MagicToolbox>
+      )}
     </div>
   )
 }

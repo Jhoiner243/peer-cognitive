@@ -12,6 +12,16 @@ export const getEdgeId = (sourceId: string, targetId: string) =>
   `edge-${sourceId}---${targetId}---${uuidv4()}`
 export const getNoteId = () => `note-${uuidv4()}`
 
+export interface NodeLabelAndTags {
+  label: string
+  tags: string[]
+}
+
+export const predefinedResponses = {
+  noValidResponse: () => 'no valid response',
+  noValidTags: () => 'no tags found',
+}
+
 import { Node, Position } from 'reactflow'
 
 const getNodeIntersection = (intersectionNode: Node, targetNode: Node) => {

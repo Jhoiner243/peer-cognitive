@@ -32,7 +32,7 @@ export default function ProtectedLayout({
             {children}
           </main>
          </SidebarInset>
-        <ChatSidebar collapsible="none" className="border-l w-[350px]" />
+        <ChatSidebar collapsible="none" className="" />
       </SidebarProvider>
     </MessagesProvider>
   )

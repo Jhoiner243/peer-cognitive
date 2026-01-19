@@ -254,32 +254,26 @@ export const answerObjectsToReactFlow = (
     return true
   })
 
-    const filteredNodeEntities = nodeEntities.filter(nodeEntity => {
-    // eliminate orphan nodes
+  const filteredNodeEntities = nodeEntities.filter(nodeEntity => {
+    // strictly eliminate orphan nodes
     const { id } = nodeEntity
 
     if (id === '$N1') return true
 
-    if (nodeEntities.length === 1 && collapsedHiddenNodeIds.size !== 0)
-      return true
-
-    if (collapsedHiddenNodeIds.has(id)) return false
-
-    return (
-      // that's all edges
-      filteredEdgeEntities.find(
-        edgeEntity =>
-          edgeEntity.edgePairs[0].sourceId === id ||
-          edgeEntity.edgePairs[0].targetId === id,
-      ) !== undefined
+    const isConnected = filteredEdgeEntities.some(
+      edgeEntity =>
+        edgeEntity.edgePairs[0].sourceId === id ||
+        edgeEntity.edgePairs[0].targetId === id,
     )
+
+    return isConnected
   })
 
     const computedNodes = constructGraph(
     graph,
     nodeEntities,
     edgeEntities,
-    filteredNodeEntities.length ? filteredNodeEntities : nodeEntities, // you don't want to remove everything
+    filteredNodeEntities,
     filteredEdgeEntities,
   )
 

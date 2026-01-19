@@ -17,8 +17,8 @@ export class GroqService {
       const result = streamText({
         model: this.groq('llama-3.3-70b-versatile'),
         messages: messages,
+        
         temperature: 0.7,
-        maxOutputTokens: 1000,
       });
       return result;
     } catch (error) {
