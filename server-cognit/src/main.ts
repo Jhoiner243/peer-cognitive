@@ -3,9 +3,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {cors: true});
+  const app = await NestFactory.create(AppModule, { cors: true });
+
   app.setGlobalPrefix('api');
-  
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -14,8 +15,15 @@ async function bootstrap() {
     }),
   );
 
+  // Health check raíz para la plataforma
+  app.getHttpAdapter().get('/', (req, res) => {
+    res.json({ status: 'ok' });
+  });
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
+
   const logger = new Logger('Main');
-  await app.listen(process.env.PORT ?? 3000);
-  logger.log(`Application is running on: ${await app.getUrl()}`);
+  logger.log(`Application is running on port ${port}`);
 }
 bootstrap();
