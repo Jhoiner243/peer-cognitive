@@ -1,8 +1,8 @@
-import { StreamCleaningAnnotationsRegexConstants } from "../../../domain/constants/stream-cleaning-annotations-regex.constants"
+import { SplitAnnotationsApplicationService } from "../split-annotations-sentences/split-annotations.application-service"
 
 export class CleanStreamedAnnotationsServiceApplication {
     cleanStreamedAnnotationsRealtime(streamedInput: string) {
-        const cleanSegment = streamedInput.replace(StreamCleaningAnnotationsRegexConstants.streamCleaningAnnotationRegex, '')
+        const cleanSegment = new SplitAnnotationsApplicationService().splitAnnotationsSentences(streamedInput)
         return cleanSegment
     }   
 }

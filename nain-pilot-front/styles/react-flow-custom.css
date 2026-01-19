@@ -1,0 +1,680 @@
+/* React Flow Custom Styles */
+
+/* Variables */
+:root {
+  --shadow-default: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-grey-default: 0 2px 8px rgba(100, 100, 100, 0.15);
+  --shadow-node-selected: var(--shadow-heavy);
+  
+  --white: #ffffff;
+  --black: #000000;
+  --light: #f0f0f0;
+  --light-grey: #e0e0e0;
+  --mid-grey: #999999;
+  --grey: #666666;
+  --red: #ff4444;
+  --purple: #9333ea;
+  --elegant-yellow: #fbbf24;
+  --elegant-blue: #3b82f6;
+  --elegant-red: #dc2626;
+  --warn-yellow-x-light: #fef3c7;
+  
+  --radius-default: 8px;
+  --radius-small: 4px;
+  --padding-xxs: 2px;
+  --padding-xs: 4px;
+  --padding-small: 8px;
+  --padding-mid: 16px;
+  --padding-large: 24px;
+  --padding-x-large: 32px;
+  
+  --font-size-xs: 11px;
+  --font-size-small: 12px;
+  --font-size-default: 14px;
+  --font-size-x-large: 18px;
+  --font-weight-thin: 400;
+  
+  --opacity-high: 0.9;
+  --opacity-mid: 0.5;
+  --opacity-default: 0.3;
+  
+  --transition-fast: 150ms;
+  --transition-normal: 300ms;
+  --transition-normal-slow: 500ms;
+  --transition-slow: 600ms;
+  
+  --edge-color-stroke: #aaa;
+  --edge-stroke-width: 2px;
+  
+  --opacity-still-there: 0.1;
+  --opacity-xh: 0.7;
+}
+
+/* Group Node Styles */
+.react-flow__node-group {
+  border-radius: var(--radius-default) !important;
+  border: none !important;
+  outline: 0 solid transparent;
+  background: rgba(147, 51, 234, 0.1) !important;
+  box-shadow: none !important;
+  transition: outline var(--transition-fast);
+}
+
+.react-flow__node-group.selected {
+  outline: 4px solid rgba(147, 51, 234, 0.7) !important;
+}
+
+/* Generating/Changing Flow Animations */
+.generating-flow .react-flow__node,
+.changing-flow .react-flow__node {
+  transition: transform var(--transition-slow) ease;
+}
+
+/* React Flow Node Base Styles */
+.react-flow__node {
+  user-select: none;
+  border: none;
+}
+
+.react-flow__node.react-flow__node-magic {
+  z-index: 999999 !important;
+}
+
+.react-flow__node.react-flow__node-group {
+  z-index: -1 !important;
+}
+
+/* Node Merge Animation */
+.react-flow__node.node-to-merge-source .custom-node-body {
+  transform: scale(0.7);
+}
+
+.react-flow__node.node-to-merge-source .magic-toolbox {
+  opacity: 0 !important;
+}
+
+.react-flow__node.node-to-merge-source .node-label {
+  opacity: var(--opacity-high) !important;
+}
+
+/* Custom Node Body */
+.custom-node-body {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: var(--white);
+  border: none;
+  border-radius: var(--radius-default);
+  box-shadow: var(--shadow-default);
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  transition:
+    box-shadow var(--transition-fast),
+    outline var(--transition-fast),
+    outline-offset var(--transition-fast),
+    opacity var(--transition-fast),
+    transform var(--transition-normal);
+}
+
+.custom-node-body .node-label {
+  transition:
+    opacity var(--transition-normal) ease,
+    transform var(--transition-normal) ease,
+    font-size var(--transition-normal) ease;
+}
+
+.custom-node-body.custom-node-meta-pressed {
+  box-shadow: var(--light-grey) 0 0 0 2px !important;
+}
+
+.custom-node-body.custom-node-temporary {
+  outline-style: dashed !important;
+  outline-width: 2px;
+  outline-color: var(--grey);
+  outline-offset: 2px;
+}
+
+.custom-node-body.custom-node-explained {
+  outline: 2px solid rgba(147, 51, 234, 0.5) !important;
+  outline-offset: 2px;
+}
+
+.custom-node-body.custom-node-body-pseudo {
+  box-shadow: none !important;
+}
+
+.custom-node-body.custom-node-body-pseudo .super-wrapper.super-wrapper-static-text-node {
+  width: fit-content !important;
+  min-width: 5rem !important;
+}
+
+.custom-node-body.custom-node-body-pseudo .node-label {
+  font-size: var(--font-size-small) !important;
+  padding: calc(var(--padding-mid) + (var(--font-size-default) - var(--font-size-small)) / 2) var(--padding-mid) !important;
+}
+
+/* Custom Node Tag */
+.custom-node-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: var(--mid-grey);
+  box-sizing: border-box;
+  padding: var(--padding-xs) var(--padding-small);
+  border-radius: 0 0 var(--radius-default) var(--radius-default);
+  white-space: nowrap;
+  overflow: hidden;
+  margin: 0;
+  transition: opacity var(--transition-fast);
+  cursor: pointer;
+}
+
+.custom-node-tag::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  box-shadow:
+    inset rgba(153, 153, 153, 0.5) -3px 0 4px 3px,
+    inset rgba(153, 153, 153, 0.5) 3px 0 4px 3px;
+}
+
+.custom-node-tag span {
+  color: var(--white);
+  font-size: var(--font-size-xs);
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.custom-node-tag span::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-image: linear-gradient(
+    transparent 0 calc(50% - 0.5px),
+    var(--white) calc(50% - 0.5px) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px) 100%
+  );
+  width: 0;
+  height: 100%;
+  transition: width var(--transition-normal) ease-out;
+  display: inline-block;
+}
+
+.custom-node-tag:hover span::before {
+  width: 100%;
+}
+
+/* Custom Node Content */
+.custom-node-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--white);
+  border-radius: var(--radius-default);
+  transition: transform var(--transition-fast);
+}
+
+.custom-node-content.custom-node-content-target {
+  pointer-events: none;
+}
+
+.custom-node-content,
+.custom-node-content * {
+  font-family: inherit;
+  color: var(--black);
+  font-size: var(--font-size-default);
+  font-weight: var(--font-weight-thin);
+}
+
+/* Custom Handles */
+.custom-handle {
+  position: absolute;
+  width: var(--padding-small);
+  height: var(--padding-small);
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+  border: var(--light) solid 2px;
+  border-radius: 50%;
+  opacity: 1;
+  background-color: var(--white);
+  z-index: 9;
+  box-sizing: border-box;
+}
+
+.custom-handle.target-handle {
+  left: 0;
+}
+
+.custom-handle.source-handle {
+  left: 100%;
+}
+
+/* Selected Node */
+.react-flow__node.selected .custom-node-body {
+  box-shadow: var(--shadow-node-selected);
+  outline: 2px solid rgba(255, 68, 68, 0.5);
+  outline-color: rgba(255, 68, 68, 0.5) !important;
+  outline-offset: 2px;
+}
+
+.custom-node-body.custom-node-body-highlighted {
+  box-shadow: var(--shadow-node-selected);
+  outline: 2px solid rgba(255, 68, 68, 0.5);
+  outline-color: rgba(255, 68, 68, 0.5) !important;
+  outline-offset: 2px;
+}
+
+/* Node Collapse Button */
+.custom-node-return-collapse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
+  z-index: 999;
+  width: 2rem;
+  height: 2rem;
+  background-color: var(--white);
+  border-radius: 50%;
+  box-shadow: var(--shadow-default);
+  cursor: pointer;
+}
+
+.custom-node-return-collapse * {
+  font-size: var(--font-size-x-large);
+}
+
+/* Meta Pressed State */
+.flow-meta-pressed .react-flow__node {
+  z-index: -1 !important;
+}
+
+.flow-meta-pressed .custom-node-body:not(.magic-node-body) {
+  transform: scale(0.99);
+  transform-origin: center;
+}
+
+/* ============================================ */
+/* React Flow Edges - Comprehensive Styling */
+/* ============================================ */
+
+/* Edge container z-index management */
+.react-flow:not(:has(.react-flow__node.selected)) .react-flow__edges:has(.react-flow__edge.selected) {
+  z-index: 999999 !important;
+}
+
+/* Base edge styling */
+.react-flow__edge {
+  position: absolute !important;
+}
+
+/* Edge path main line */
+.react-flow__edge .react-flow__edge-path {
+  stroke: var(--edge-color-stroke);
+  stroke-width: var(--edge-stroke-width);
+  z-index: 1;
+  transition:
+    stroke var(--transition-fast),
+    stroke-width var(--transition-fast);
+}
+
+/* Edge background path (for better visibility) */
+.react-flow__edge .react-flow__edge-path-background {
+  fill: none;
+  stroke: var(--white);
+  stroke-width: calc(3 * var(--edge-stroke-width));
+  stroke-linecap: round;
+  z-index: -1;
+}
+
+/* Selected edge state */
+.react-flow__edge.selected,
+.react-flow__edge:focus,
+.react-flow__edge:focus-visible {
+  z-index: 999999 !important;
+}
+
+.react-flow__edge.selected .react-flow__edge-path,
+.react-flow__edge:focus .react-flow__edge-path,
+.react-flow__edge:focus-visible .react-flow__edge-path {
+  stroke: rgba(255, 68, 68, 0.5) !important;
+}
+
+/* Explained edge styling */
+.react-flow__edge .edge-explained {
+  stroke-linecap: round !important;
+  stroke-dasharray: 0, 4;
+  stroke: rgba(147, 51, 234, 0.5) !important;
+}
+
+/* Edge label foreignObject wrapper */
+.react-flow__edge .edge-label-wrapper {
+  width: min-content;
+  height: min-content;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  opacity: 1;
+  transition: opacity var(--transition-normal);
+}
+
+.react-flow__edge .edge-label-wrapper.hidden-edge-label-wrapper {
+  opacity: 0;
+}
+
+/* Edge custom type switch */
+.react-flow__edge .edge-custom-type-switch {
+  display: flex;
+  flex-direction: row;
+  gap: var(--padding-small);
+  width: 100%;
+  pointer-events: all;
+}
+
+.react-flow__edge .edge-custom-type-switch .type-switch-button {
+  flex-grow: 1;
+  padding: var(--padding-small) !important;
+  transition: outline var(--transition-fast);
+}
+
+.react-flow__edge .edge-custom-type-switch .type-switch-button.selected {
+  outline: 1px solid var(--elegant-blue) !important;
+}
+
+/* ============================================ */
+/* Edge Label Styles - Modern Design */
+/* ============================================ */
+
+/* Base wrapper positioning */
+.edge-label-wrapper {
+    pointer-events: all;
+  z-index: 10;
+}
+
+/* Edge label main styling */
+.edge-label {
+  display: inline-block;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--card)) 100%);
+  border: 1.5px solid hsl(var(--border));
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+  white-space: nowrap;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+  user-select: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+/* Hover effect */
+.edge-label:hover {
+  transform: scale(1.08);
+  border-color: hsl(var(--primary) / 0.5);
+  box-shadow: 
+    0 4px 16px hsl(var(--primary) / 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Selected edge label */
+.react-flow__edge.selected ~ foreignObject .edge-label,
+.react-flow__edge-path.path-selected ~ foreignObject .edge-label {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.12), hsl(var(--primary) / 0.08));
+  border-color: hsl(var(--primary) / 0.6);
+  color: hsl(var(--primary));
+  font-weight: 600;
+  box-shadow: 
+    0 4px 20px hsl(var(--primary) / 0.25),
+    0 2px 8px hsl(var(--primary) / 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* High saliency labels - more prominent */
+.react-flow__edge[data-saliency="high"] ~ foreignObject .edge-label {
+  border-width: 2px;
+  border-color: hsl(var(--primary) / 0.35);
+  font-weight: 600;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.05), hsl(var(--card)));
+}
+
+/* Low saliency labels - more subtle */
+.react-flow__edge[data-saliency="low"] ~ foreignObject .edge-label {
+  opacity: 0.65;
+  font-size: 11px;
+  padding: 4px 10px;
+  font-weight: 400;
+}
+
+/* Fade in animation */
+@keyframes edge-label-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.edge-label {
+  animation: edge-label-fade-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Explained edge label */
+.react-flow__edge.edge-explained ~ foreignObject .edge-label {
+  border-color: rgba(147, 51, 234, 0.4);
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.08), hsl(var(--card)));
+}
+
+/* ============================================ */
+
+/* Collapsed Node State */
+.react-flow__node.node-collapsed {
+  opacity: 0.3;
+  transform: scale(0.8);
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+.react-flow__node.node-collapsed .custom-node-body {
+  filter: grayscale(0.5);
+}
+
+/* Node Selected for Merge */
+.react-flow__node .custom-node-body[style*="rgba(59, 130, 246"] {
+  outline: 2px solid var(--elegant-blue) !important;
+  outline-offset: 4px;
+  animation: pulse-merge 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-merge {
+  0%, 100% {
+    outline-offset: 4px;
+  }
+  50% {
+    outline-offset: 8px;
+  }
+}
+
+/* React Flow Wrapper */
+.react-flow-wrapper {
+  width: 100%;
+  height: 100%;
+  background-color: var(--white);
+  border-radius: var(--radius-default);
+  outline: 1px solid var(--light-grey);
+}
+
+/* Animations */
+@keyframes highlighted-text-background {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: var(--warn-yellow-x-light);
+  }
+  100% {
+    background-color: var(--warn-yellow-x-light);
+  }
+}
+
+/* ============================================ */
+/* Magic Toolbox Styles */
+/* ============================================ */
+
+@keyframes toolbox-fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.magic-toolbox {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+  z-index: 1000;
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.2);
+  margin-bottom: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: toolbox-fade-in 0.3s ease-out;
+  cursor: default;
+}
+
+.magic-toolbox:not(.expanded-toolbox) {
+  height: 4px;
+  width: 4px;
+  min-width: unset;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0.5;
+}
+
+.magic-toolbox:not(.expanded-toolbox):hover {
+  opacity: 1;
+  transform: translateX(-50%) scale(1.5);
+}
+
+.magic-toolbox-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.magic-toolbox-icon {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+  color: var(--muted-foreground);
+  font-size: 20px !important;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.magic-toolbox-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.magic-toolbox-item-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.magic-toolbox-button {
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--secondary-foreground);
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: fit-content;
+}
+
+.magic-toolbox-button:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--ring);
+}
+
+.magic-toolbox-button.disabled, .magic-toolbox-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.magic-tagging-options, .magic-suggest-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.magic-toolbox-tag {
+  background: var(--primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--primary-foreground);
+  padding: 2px 6px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.magic-toolbox-tag:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.waiting-for-model-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  width: 100%;
+}

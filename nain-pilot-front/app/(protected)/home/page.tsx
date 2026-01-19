@@ -1,7 +1,17 @@
+"use client"
+
+import { KnowledgeGraph } from "@/components/KnowledgeGraph"
+import { TextAreaPrompts } from "@/components/TextAreaPrompts"
+
 export default function Home() {
-    return (
-        <div>
-            <h1>Home</h1>
+  return (
+      <div className="flex flex-1 flex-col gap-3 p-4 pt-0 h-screen">
+        <div className="flex-1 rounded-xl bg-card border shadow-sm min-h-0 overflow-hidden h-[70vh]">
+           <KnowledgeGraph />
         </div>
-    );
+        <div className="shrink-0">
+          <TextAreaPrompts />
+        </div>
+      </div>
+  )
 }

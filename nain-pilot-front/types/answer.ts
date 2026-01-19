@@ -1,3 +1,4 @@
+import { Prompt } from "../components/Contexts"
 import { EdgeEntity } from "./entities/edges/edge.entity"
 import { OriginRange } from "./entities/nodes/node-individual.entity"
 import { NodeEntity } from "./entities/nodes/node.entity"
@@ -45,4 +46,32 @@ export interface QuestionAndAnswerSynced {
   highlightedCoReferenceOriginRanges: OriginRange[] // for highlight text
   highlightedNodeIdsProcessing: string[] // for highlight nodes when it is expanding
   saliencyFilter: RelationshipSaliency // to filter edges
+}
+
+interface ModelStatus {
+  modelAnswering: boolean
+  modelParsing: boolean
+  modelAnsweringComplete: boolean
+  modelParsingComplete: boolean
+  modelError: boolean
+  modelInitialPrompts: Prompt[]
+}
+
+
+export interface QuestionAndAnswer {
+  id: string
+  question: string
+  answer: string
+  answerObjects: AnswerObject[]
+  modelStatus: ModelStatus
+  synced: QuestionAndAnswerSynced
+}
+
+export interface PartialQuestionAndAnswer {
+  id?: string
+  question?: string
+  answer?: string
+  answerObjects?: AnswerObject[]
+  modelStatus?: Partial<ModelStatus>
+  synced?: Partial<QuestionAndAnswerSynced>
 }
